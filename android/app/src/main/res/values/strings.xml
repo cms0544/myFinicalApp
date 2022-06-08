@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">myFinicalApp</string>
+    <string name="title_activity_main">myFinicalApp</string>
+    <string name="package_name">io.ionic.myfinicalApp</string>
+    <string name="custom_url_scheme">io.ionic.myfinicalApp</string>
+</resources>

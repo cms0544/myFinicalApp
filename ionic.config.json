@@ -1,0 +1,7 @@
+{
+  "name": "myFinicalApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}

@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.myfinicalApp",
+	"appName": "myFinicalApp",
+	"webDir": "dist",
+	"bundledWebRuntime": false
+}
