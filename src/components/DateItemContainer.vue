@@ -3,11 +3,17 @@
             <ion-label>{{keyitem}}</ion-label>   
               <ion-label slot="end">花费{{total}}</ion-label>  
          </ion-item-divider>
-         <ion-item v-for="(item,index) of value" :key="index" @click="showModal(item)"    @touchstart="touchlong(item)"   @touchup="touchlongend"      >
+         <ion-item v-for="(item,index) of value" :key="index" @click="showModal(item)"    @touchstart="touchlong(item)"   @touchend="touchlongend"      >
              <ion-label>
               {{item.decript}}
+                 <ion-badge :color="item.costtype==0?'primary':'danger'">
+                      {{item.costtype==0?"收入":"支出"}}
+                  </ion-badge>
               </ion-label>
+            
+              
              <ion-label slot="end">   {{item.price}}</ion-label> 
+            
             
          </ion-item>  
 </template>
@@ -15,9 +21,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Cost } from '@/store/cost';
-import { IonItemDivider,IonLabel,IonItem,alertController } from '@ionic/vue';
+import { IonItemDivider,IonLabel,IonItem,alertController,IonBadge } from '@ionic/vue';
 import { CostArr } from '@/store/costArr';
 import { useFinical } from '@/composables/useFinical'
+
 
 export default defineComponent({
   name: 'DateItemContainer',
@@ -65,30 +72,25 @@ export default defineComponent({
     }
 
     const showModal = (item:Cost)=>{
-      useFinical(item).addFinical();
+      useFinical(item,()=>{emit('valchange')}).addFinical();
     }
   
 
-    return {touchlong,touchlongend,showModal};
+    return {touchlong,touchlongend,showModal,costArr};
   },
   computed:{
     total:function(){
         let returnVal = 0;
         if(this.value!=null){
             this.value.forEach(element => {
-            if(element.costtype==0){
-                //收入
-                returnVal = returnVal - parseFloat(element.price);
-            }else{
-              //支出
-                returnVal = returnVal + parseFloat(element.price);
-            }
+              returnVal+= this.costArr.getTotal(element);
+           
           });
         }
-        return returnVal;
+        return returnVal.toFixed(2);
     }
   },
-  components:{IonItemDivider,IonLabel,IonItem}
+  components:{IonItemDivider,IonLabel,IonItem,IonBadge}
 });
 </script>
 

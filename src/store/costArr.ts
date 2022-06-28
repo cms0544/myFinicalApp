@@ -1,10 +1,12 @@
 import { Cost} from "@/store/cost"
-
+import { alertController } from '@ionic/vue';
 import { Storage } from '@capacitor/storage';
+import { CostType } from '@/enum/costType'
+import { format} from  'date-fns'
 export  class CostArr{
  
-    //获取内存上的数组
-    async get(): Promise<Cost[]>{
+    //获取内存上的数组 condtion 格式 date=2
+    async get(callback?:(item:Cost)=>boolean): Promise<Cost[]>{
         let myFinicalArr:Cost[] = [];
         const {value}  = await Storage.get({
             key: 'myFinical'
@@ -12,13 +14,43 @@ export  class CostArr{
         if(value!=null){
             myFinicalArr = JSON.parse(value.toString());
         }
+
+        if(callback!=null){
+             //有条件
+             myFinicalArr = myFinicalArr.filter((item)=>{
+                return callback(item);
+               
+
+            })
+        }
+           
+       
         return myFinicalArr;
     }
 
 
        //获取内存上的数组（新增和修改）
-    async add(updateCostItem:Cost): Promise<void>{
-      
+    async add(updateCostItem:Cost): Promise<boolean>{
+        if(updateCostItem.decript == ""){
+            const alert = await alertController
+                .create({
+                header: '确认!',
+                message: '请输入备注!!!',
+                buttons: ['确定']
+                });
+                alert.present();
+            return false;
+        }
+        if(updateCostItem.price == "0" || updateCostItem.price == ""){
+            const alert = await alertController
+                .create({
+                header: '确认!',
+                message: '请输入价格!!!',
+                buttons: ['确定']
+                });
+                alert.present();
+                return false;
+        }
         const  myFinicalArr:Cost[] = await this.get();
         if(updateCostItem.id == 0){
             //id为0新增
@@ -40,7 +72,8 @@ export  class CostArr{
             key: 'myFinical',
             value: JSON.stringify(myFinicalArr),
         });
-
+        return true;
+        
     }
     //删除
     async delete(id:number): Promise<void>{
@@ -59,10 +92,10 @@ export  class CostArr{
     }
 
     //获取转换后的日期格式列表
-    async getlist():Promise<Record<string,Cost[]>>{
+    async getlist(callback?:(item:Cost)=>boolean):Promise<Record<string,Cost[]>>{
         const finialArr:Record<string,Cost[]>= {} ;
 
-        const  myFinicalArr:Cost[] = await this.get();
+        const  myFinicalArr:Cost[] = await this.get(callback);
         let DateKey:string[] = [];
         myFinicalArr.forEach((item:Cost)=>{
           if(finialArr[item.date]==null){
@@ -83,12 +116,69 @@ export  class CostArr{
             returnJson[item.toString()] = finialArr[item.toString()];
         })
 
-        console.log(finialArr);
-
+  
         return returnJson;
     
     }
     
-   
-}
+    //获得每月份数据
+    async getlistByMonth(callback?:(item:Cost)=>boolean):Promise<Array<Record<string,number>>>{
+        const result:Record<string,number>= {} ;
+
+        const  myFinicalArr:Cost[] = await this.get(callback);
+
+        myFinicalArr.forEach((item:Cost)=>{
+            const month = item.date.substring(0,7);
+            if(result[month]==null){
+                result[month]  = 0 ;
+            }
+            result[month]+=this.getTotal(item);
+        });
+
+        const ret = [];
+        for(const month in result){
+            ret.push({
+                "name":month,
+                "y":result[month]
+            });
+        }
+
+        return ret;
+    
+    }
+
+    async getSumBySearch(callback?:(item:Cost)=>boolean){
+        const  myFinicalArr:Cost[] = await this.get(callback);
+        let total = 0;
+        myFinicalArr.forEach((item:Cost)=>{
+            total+= this.getTotal(item);
+            
+        });
+
+        return total;
+
+    }
+    //每一次收入的收入支出
+    getTotal(item:Cost):number{
+        let total = 0;
+        if(item.costtype == CostType.Expenditure){
+            total -= parseFloat(item.price);
+        }else{
+            total+= parseFloat(item.price);
+        }
+        return total;
+    }
+
+
+    formatdate(dateStr?:string){
+        if(dateStr!="" && dateStr !=null){
+            return format(new Date(dateStr),"yyyy-MM-dd");
+        }else{
+            return format(new Date(),"yyyy-MM-dd");
+        }
+        
+    }
+
+} 
+
  

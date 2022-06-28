@@ -12,7 +12,7 @@
     </ion-header>
     <ion-content>
  
-        <ion-list>
+        <ion-list class="addInput">
              <ion-item>
                   <ion-label>
                       类型
@@ -27,16 +27,9 @@
                   <ion-label>
                      时间
                   </ion-label>
-                 <ion-input  :value="updateCostItem.date"/>
-                    <ion-button fill="clear" id="open-date-input-2">
-                        <ion-icon :icon="calendar" />
-                    </ion-button>
-                    <ion-popover trigger="open-date-input-2" :show-backdrop="false">
-                        <ion-datetime
-                            presentation="date"
-                             @ionChange="(ev: DatetimeCustomEvent) => updateCostItem.date = formatDate(ev.detail.value)"
-                        />
-                    </ion-popover>
+
+                  <DateSelect v-model:value="updateCostItem.date"  ></DateSelect>
+      
              </ion-item>
               <ion-item>
                   <ion-label>
@@ -53,7 +46,7 @@
                   
              </ion-item>
              <ion-item>
-                 <ion-grid>
+                 <ion-grid class="inputNumber">
                    <ion-row  v-for="row of 3" v-bind:key="row">
                        <ion-col v-for="col of 3" v-bind:key="col" @click="ClickNumber( ((row-1)*3 + col))">
                            {{(row-1)*3 + col}}
@@ -79,7 +72,7 @@
     </ion-content>
 </template>
 <style>
-    ion-col{
+    .inputNumber ion-col{
             text-align: center;
             width: 50px;
             height: 50px;
@@ -88,45 +81,50 @@
             margin: 2px;
     }
 
-    ion-input{
+    .addInput ion-input{
         text-align: right;
        
     }
 
+ 
+
+ 
   
 </style>
 <script lang="ts">
-import { IonContent, IonHeader, IonTitle, IonToolbar,modalController,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonDatetime,IonPopover,IonIcon} from '@ionic/vue';
-import {  defineComponent } from 'vue';
+import { IonContent, IonHeader, IonTitle, IonToolbar,modalController,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonIcon} from '@ionic/vue';
+import {  defineComponent,ref } from 'vue';
 import {  backspace ,calendar} from 'ionicons/icons';
 import { Cost } from '@/store/cost';
-import { format, parseISO } from  'date-fns'
 import { CostArr } from '@/store/costArr';
-
+import { format } from  'date-fns'
+import  DateSelect  from '@/components/DateSelect.vue'
 
 export default defineComponent({
   name: 'addModal',
   props: {
      costItem: {  type:Cost,default:new Cost(0,"","0",format(new Date(),"yyyy-MM-dd"),0) }
   },
-  data(){
-      let costArr = new CostArr();
-
-      return {
-          updateCostItem:this.costItem,costArr
-      }
-  },
-  setup() {
+ 
+  setup(props) {
     const dismissModal= ()=>{
-        modalController.dismiss();
+        modalController.dismiss({success:true});
     };
+
+    const costArr = new CostArr();
+  
+  
+    const  updateCostItem = ref(props.costItem);
+     
     
-     const formatDate = (value: string) => {
-        return format(parseISO(value), 'yyyy-MM-dd');
-      };
+    
+
+    const selectDate =  (value) => { 
+        updateCostItem.value.date =value;
+    }
 
     return {
-      backspace,dismissModal,calendar,formatDate
+      backspace,dismissModal,calendar,updateCostItem,selectDate,costArr
     }
   },
   methods:{
@@ -150,19 +148,25 @@ export default defineComponent({
             this.updateCostItem.price = temprice==""?"0":temprice;
         
         },
-        confirm:function(){
-             this.costArr.add(this.updateCostItem);
-             this.dismissModal();
+        confirm:async function(){
+             let  returnVal = await this.costArr.add(this.updateCostItem);
+                if(returnVal){
+                         this.dismissModal();
+                         this.$emit("valchange");
+                }
+            
         },
         add:async function(){
-           
-           this.costArr.add(this.updateCostItem);
-            this.updateCostItem = new Cost();
+             let  returnVal = await this.costArr.add(this.updateCostItem);
+                if(returnVal){
+                        this.updateCostItem = new Cost();
+                }
             
+      
         },
 
   },
  
-  components: { IonContent, IonHeader, IonTitle, IonToolbar,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonDatetime,IonPopover,IonIcon }
+  components: { IonContent, IonHeader, IonTitle, IonToolbar,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonIcon,DateSelect }
 });
 </script>
