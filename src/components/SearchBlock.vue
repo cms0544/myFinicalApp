@@ -5,8 +5,12 @@
                        <ion-input class="priceinput" :value="tempsearchCondition.pricestart" v-model="tempsearchCondition.pricestart"></ion-input> - <ion-input class="priceinput" :value="tempsearchCondition.priceend"  v-model="tempsearchCondition.priceend"></ion-input>
                 </ion-item>
                  <ion-item>
-                       <ion-label>时间范围</ion-label>
-                        <DateSelect v-model:value="tempsearchCondition.datestart" dateid="datestart"   ></DateSelect> -  <DateSelect  v-model:value="tempsearchCondition.dateend" dateid="dateend"  ></DateSelect>
+                       <ion-label>开始日期</ion-label>
+                        <DateSelect v-model:value="tempsearchCondition.datestart" dateid="datestart"   ></DateSelect> 
+                </ion-item>
+                <ion-item>
+                       <ion-label>结束日期</ion-label>
+                        <DateSelect  v-model:value="tempsearchCondition.dateend" dateid="dateend"  ></DateSelect>
                 </ion-item>
                  <ion-item>
                        <ion-label>关键字</ion-label>
@@ -52,9 +56,10 @@ export default defineComponent({
   setup(props,{emit}){
 
     const changeVal= (e:CustomEvent,attr:string)=>{
-      alert('11');
-      console.log(e)
-      tempsearchCondition.value[attr]= e.detail.value;
+      if(tempsearchCondition.value!=null){
+        tempsearchCondition.value[attr]= e.detail.value;
+      }
+    
     }
     const tempsearchCondition = ref(props.mySearchCondition);
      

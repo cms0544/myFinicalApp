@@ -99,6 +99,7 @@ import { Cost } from '@/store/cost';
 import { CostArr } from '@/store/costArr';
 import { format } from  'date-fns'
 import  DateSelect  from '@/components/DateSelect.vue'
+import store from '@/store';
 
 export default defineComponent({
   name: 'addModal',
@@ -149,7 +150,7 @@ export default defineComponent({
         
         },
         confirm:async function(){
-             let  returnVal = await this.costArr.add(this.updateCostItem);
+             let  returnVal = await store.dispatch("addCost",this.updateCostItem);
                 if(returnVal){
                          this.dismissModal();
                          this.$emit("valchange");
@@ -157,7 +158,7 @@ export default defineComponent({
             
         },
         add:async function(){
-             let  returnVal = await this.costArr.add(this.updateCostItem);
+             let  returnVal = await store.dispatch("addCost",this.updateCostItem);
                 if(returnVal){
                         this.updateCostItem = new Cost();
                 }

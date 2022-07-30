@@ -17,7 +17,7 @@ export class PurseArr{
 
     getPurse = async ():Promise<Purse>=>{
         const temppurse = await Storage.get({key:"purse"});
-        if(temppurse !=null){
+        if(temppurse !=null && temppurse.value !=null){
             this.purse = JSON.parse(temppurse.value.toString())
             return this.purse;
         }else{
@@ -25,9 +25,9 @@ export class PurseArr{
         }
     }
     //计算钱包   开始日期+钱
-    calcuTotal= async ():Promise<number>=>{
+    calcuTotal= async ( isadd?:boolean ):Promise<number>=>{
         
-        if(this.purse.begindate == ""){
+        if(isadd&& this.purse.begindate == ""){
              const alert = await alertController.create({
                 header:"提示",
                 message:"请输入开始日期",
@@ -37,7 +37,7 @@ export class PurseArr{
             return null;
         }
 
-        if(this.purse.beginmoney == ""){
+        if(isadd && this.purse.beginmoney == ""){
             const alert2 = await alertController.create({
                header:"提示",
                message:"请输入开始金钱",
@@ -55,7 +55,11 @@ export class PurseArr{
             key:"purse",
             value:JSON.stringify(this.purse)
         });
-
-        return parseFloat(this.purse.beginmoney)+money;
+        if(this.purse.beginmoney == ""){
+            return null;
+        }else{
+            return parseFloat(this.purse.beginmoney)+money;
+        }
+        
     }
 }

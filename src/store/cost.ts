@@ -5,6 +5,7 @@ export  class Cost{
     price:string;
     date:string;
     costtype: number;
+    isupload:boolean;
 
    
     constructor(id=0,decript="",price="0",date=format(new Date(),"yyyy-MM-dd"),costtype=1){

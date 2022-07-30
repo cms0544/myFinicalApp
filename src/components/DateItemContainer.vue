@@ -14,7 +14,7 @@
               
              <ion-label slot="end">   {{item.price}}</ion-label> 
             
-            
+              
          </ion-item>  
 </template>
 

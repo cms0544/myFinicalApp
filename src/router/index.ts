@@ -27,6 +27,18 @@ const routes: Array<RouteRecordRaw> = [
   {
     path:'/TotalReport',
     component:() => import('@/views/TotalReport.vue')
+  },
+  {
+    path:'/LoginPage',
+    component:() => import('@/views/LoginPage.vue')
+  },
+  {
+    path:'/RegisterPage',
+    component:()=>import('@/views/RegisterPage.vue')
+  },
+  {
+    path:'/RegisterPage/:id',
+    component:()=>import('@/views/RegisterPage.vue')
   }
 ]
 

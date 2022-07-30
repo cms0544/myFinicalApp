@@ -1,27 +1,27 @@
 import { Cost} from "@/store/cost"
-import { alertController } from '@ionic/vue';
 import { Storage } from '@capacitor/storage';
 import { CostType } from '@/enum/costType'
 import { format} from  'date-fns'
 export  class CostArr{
  
-    //获取内存上的数组 condtion 格式 date=2
+    // //获取内存上的数组 condtion 格式 date=2
     async get(callback?:(item:Cost)=>boolean): Promise<Cost[]>{
         let myFinicalArr:Cost[] = [];
         const {value}  = await Storage.get({
             key: 'myFinical'
         });
-        if(value!=null){
+        if(value!=null && value!="null"){
             myFinicalArr = JSON.parse(value.toString());
         }
 
         if(callback!=null){
              //有条件
-             myFinicalArr = myFinicalArr.filter((item)=>{
-                return callback(item);
-               
-
-            })
+             if(myFinicalArr!=null){
+                myFinicalArr = myFinicalArr.filter((item)=>{
+                    return callback(item);
+                });
+             }
+             
         }
            
        
@@ -29,60 +29,17 @@ export  class CostArr{
     }
 
 
-       //获取内存上的数组（新增和修改）
-    async add(updateCostItem:Cost): Promise<boolean>{
-        if(updateCostItem.decript == ""){
-            const alert = await alertController
-                .create({
-                header: '确认!',
-                message: '请输入备注!!!',
-                buttons: ['确定']
-                });
-                alert.present();
-            return false;
-        }
-        if(updateCostItem.price == "0" || updateCostItem.price == ""){
-            const alert = await alertController
-                .create({
-                header: '确认!',
-                message: '请输入价格!!!',
-                buttons: ['确定']
-                });
-                alert.present();
-                return false;
-        }
-        const  myFinicalArr:Cost[] = await this.get();
-        if(updateCostItem.id == 0){
-            //id为0新增
-            updateCostItem.id = myFinicalArr.length==0?0:myFinicalArr[0].id+1;
-            myFinicalArr.splice(0,0,updateCostItem);
-        }else{
-            let updateIndex = 0;
-            myFinicalArr.forEach((item,index)=>{
-                if(item.id ==  updateCostItem.id){
-                    updateIndex = index;
-                    return true;
-                }
-            });
-            myFinicalArr[updateIndex] = updateCostItem;
-        }
-       
-       
-        await Storage.set({
-            key: 'myFinical',
-            value: JSON.stringify(myFinicalArr),
-        });
-        return true;
-        
-    }
+    
     //删除
     async delete(id:number): Promise<void>{
         let  myFinicalArr:Cost[] = await this.get();
 
-         console.log(id);
-        myFinicalArr = myFinicalArr.filter((item)=>{
-           return item.id !=id;
-        })
+        if(myFinicalArr !=null){
+            myFinicalArr = myFinicalArr.filter((item)=>{
+                return item.id !=id;
+             })
+        }
+       
        
         await Storage.set({
             key: 'myFinical',
@@ -155,7 +112,7 @@ export  class CostArr{
             
         });
 
-        return total;
+        return parseFloat(total.toFixed(2));
 
     }
     //每一次收入的收入支出

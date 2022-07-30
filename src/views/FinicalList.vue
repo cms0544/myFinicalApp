@@ -70,7 +70,7 @@
 <script lang="ts">
 import { defineComponent,onBeforeMount,Ref,ref} from 'vue';
 import { Cost } from '@/store/cost';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonList,IonFab,IonFabButton,IonIcon,IonRefresher,IonRefresherContent, RefresherCustomEvent,IonMenu,menuController} from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonList,IonFab,IonFabButton,IonIcon,IonRefresher,IonRefresherContent, RefresherCustomEvent,IonMenu,menuController, onIonViewWillEnter, onIonViewWillLeave} from '@ionic/vue';
 import { add,chevronDownCircleOutline } from 'ionicons/icons';
 import { useFinical } from '@/composables/useFinical'
 import  DateItemContainer  from '@/components/DateItemContainer.vue'
@@ -80,6 +80,8 @@ import { CostArr } from '@/store/costArr';
 import SearchBlock from '@/components/SearchBlock.vue'
 import {searchCondition} from '@/store/searchCondition'
 import { CostType } from '@/enum/costType';
+import store from '@/store';
+
 export default  defineComponent({
   name: 'FinicalListPage', 
   components: { IonHeader, IonToolbar, IonTitle, IonContent, IonPage,IonList,IonFab,IonFabButton,IonIcon,DateItemContainer,IonRefresher,IonRefresherContent,IonMenu,SearchBlock},
@@ -90,8 +92,6 @@ export default  defineComponent({
      const income = ref(0);
 
      const mySearchCondition= ref(new searchCondition(0,0,'','','',CostType.All));
-
- 
 
      const SearchCallback = ref((item:Cost)=>{ return new Date(item.date).getMonth() == new Date().getMonth()});
     // let finialArr = {'2022-06-05':[
@@ -122,15 +122,9 @@ export default  defineComponent({
     const search = async ()=>{
        menuController.open('first');
     }
-    onBeforeMount(async ()=>{
-     
-
-       resfreshList();
-
-    })
-
-
   
+
+
 
     let addFinical = ref(useFinical(new Cost( 0,  "","0", costArr.formatdate(),1),valchange ).addFinical)
 
@@ -174,6 +168,29 @@ export default  defineComponent({
       resfreshList();
     }
 
+    onIonViewWillEnter(()=>{
+        store.dispatch("StartTimer");
+
+        resfreshList();
+
+    })
+
+    onIonViewWillLeave(()=>{
+        store.dispatch("ClearTimer");
+
+    })
+  
+  
+  
+    onBeforeMount(async ()=>{
+     
+     
+       resfreshList();
+
+
+    });
+
+ 
 
     return { finialArr,add,addFinical,valchange,doRefresh,chevronDownCircleOutline,income,search,mySearchCondition,searchFinish};
   }

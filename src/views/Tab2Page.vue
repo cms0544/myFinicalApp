@@ -8,14 +8,23 @@
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">总数</ion-title>
+              <ion-list>
+                <ion-item style="padding:20px 0;">
+                  <ion-avatar>
+                    <img src="/assets/img/avatar.svg">
+                  </ion-avatar>
+                  <ion-label slot="end" v-if="userInfo==null" router-link="/LoginPage" router-direction="forword">登录</ion-label>
+                  <ion-label slot="end" v-if="userInfo!=null" :router-link="'/RegisterPage/'+userInfo.id" router-direction="forword">{{userInfo.username}}</ion-label>
+                  <ion-icon slot="end" :icon="chevronForwardOutline"></ion-icon>
+                </ion-item>
+              </ion-list>
         </ion-toolbar>
       </ion-header>
       
         <ion-grid class="total">
 
               <ion-row>
-                 <ion-col v-if="currMoney!=null">  
+                 <ion-col class="firstColumn" v-if="currMoney!=null">  
                       <div class="smalltxt">钱包余额</div>
                          <div class="valtxt">{{currMoney.toFixed(2)}}</div>
                   </ion-col>
@@ -26,7 +35,7 @@
               </ion-row>
              <ion-row>
                <ion-col>
-                   <div class="smalltxt">月收入</div>
+                   <div class="smalltxt" >月收入</div>
                    <div class="valtxt">{{mouthIncome.toFixed(2)}}</div>
                 </ion-col>
                 <ion-col>
@@ -137,19 +146,22 @@
     }
 </style>
 <script lang="ts">
-import { defineComponent,Ref,ref } from 'vue';
+import { computed, defineComponent,Ref,ref } from 'vue';
 import { add } from 'ionicons/icons';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonGrid,IonRow,IonCol, onIonViewWillEnter,IonModal,IonList,IonItem,IonLabel,IonInput,IonButtons,IonButton  } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonGrid,IonRow,IonCol, onIonViewWillEnter,IonModal,IonList,IonItem,IonLabel,IonInput,IonButtons,IonButton,IonAvatar,IonIcon } from '@ionic/vue';
 // import ExploreContainer from '@/components/ExploreContainer.vue';
 import { CostArr } from '@/store/costArr';
 import { Cost } from '@/store/cost';
 import { CostType } from '@/enum/costType'
 import DateSelect from '@/components/DateSelect.vue'
 import { Purse,PurseArr } from '@/store/purse'
+import { chevronForwardOutline } from 'ionicons/icons';
+import store from '@/store';
+
 
 export default defineComponent({
   name: 'Tab2Page',
-  components: {  IonHeader, IonToolbar, IonTitle, IonContent, IonPage,IonGrid,IonRow,IonCol,IonModal,IonList,IonItem,IonLabel,DateSelect,IonInput,IonButtons,IonButton },
+  components: {  IonHeader, IonToolbar, IonTitle, IonContent, IonPage,IonGrid,IonRow,IonCol,IonModal,IonList,IonItem,IonLabel,DateSelect,IonInput,IonButtons,IonButton,IonAvatar,IonIcon },
     setup(){
       let mouthIncome=ref(0) as Ref<number>;
       let mouthExpenditure = ref(0) as Ref<number> ;
@@ -161,9 +173,10 @@ export default defineComponent({
       const purse = ref(purseArr.purse) as Ref<Purse>;
 
       const purseModal = ref();
-
+    
       onIonViewWillEnter(async ()=>{
-            let finialArr = await costArr.get((item:Cost)=>{
+
+            let finialArr = await store.getters.cost((item:Cost)=>{
             return new Date(item.date).getMonth() == new Date().getMonth()
             });
 
@@ -192,10 +205,10 @@ export default defineComponent({
              currMoney.value = await purseArr.calcuTotal();
       })
 
+  
       const confirmPurse =async ()=>{
 
-        currMoney.value = await purseArr.calcuTotal();
-        console.log(purseModal.value);
+        currMoney.value = await purseArr.calcuTotal(true);
         purseModal.value.$el.dismiss();
       }
 
@@ -203,9 +216,15 @@ export default defineComponent({
         purseModal.value.$el.dismiss();
       }
 
+      const userInfo = computed(()=>{
+          return store.getters.user == null ? null:store.getters.user;
+      })
+
       
-       return {add,mouthIncome,mouthExpenditure,mouthTotal,total,currMoney,purse,confirmPurse,purseModal,cancelPurse}
+    
+       return {add,mouthIncome,mouthExpenditure,mouthTotal,total,currMoney,purse,confirmPurse,purseModal,cancelPurse,chevronForwardOutline,userInfo}
 
     }
+   
 });
 </script>
