@@ -11,7 +11,7 @@
               <ion-list>
                 <ion-item style="padding:20px 0;">
                   <ion-avatar>
-                    <img src="/assets/img/avatar.svg">
+                    <img  :src="photoUrl">
                   </ion-avatar>
                   <ion-label slot="end" v-if="userInfo==null" router-link="/LoginPage" router-direction="forword">登录</ion-label>
                   <ion-label slot="end" v-if="userInfo!=null" :router-link="'/RegisterPage/'+userInfo.id" router-direction="forword">{{userInfo.username}}</ion-label>
@@ -157,6 +157,7 @@ import DateSelect from '@/components/DateSelect.vue'
 import { Purse,PurseArr } from '@/store/purse'
 import { chevronForwardOutline } from 'ionicons/icons';
 import store from '@/store';
+import { getFirstDate,getLastDate} from "@/utils/dateUtils"
 
 
 export default defineComponent({
@@ -172,14 +173,21 @@ export default defineComponent({
       const purseArr = new PurseArr();
       const purse = ref(purseArr.purse) as Ref<Purse>;
 
+      
+
       const purseModal = ref();
     
       onIonViewWillEnter(async ()=>{
 
-            let finialArr = await store.getters.cost((item:Cost)=>{
-            return new Date(item.date).getMonth() == new Date().getMonth()
+            // let finialArr = await store.getters.cost((item:Cost)=>{
+            // return new Date(item.date).getMonth() == new Date().getMonth()
+            // });
+            let finialArr = await store.dispatch('getCost',{
+              datefrom:getFirstDate(new Date()),
+              dateto:getLastDate(new Date())
             });
 
+          
             mouthIncome.value = 0;
             mouthExpenditure.value = 0;
             mouthTotal.value = 0;
@@ -220,9 +228,14 @@ export default defineComponent({
           return store.getters.user == null ? null:store.getters.user;
       })
 
+      const photoUrl = computed(()=>{
+      
+        return userInfo.value == null ||userInfo.value.photourl == "" ||userInfo.value.photourl == null?"/assets/img/avatar.svg":process.env.VUE_APP_BASE_API+'/'+userInfo.value.photourl;
+      })
+
       
     
-       return {add,mouthIncome,mouthExpenditure,mouthTotal,total,currMoney,purse,confirmPurse,purseModal,cancelPurse,chevronForwardOutline,userInfo}
+       return {add,mouthIncome,mouthExpenditure,mouthTotal,total,currMoney,purse,confirmPurse,purseModal,cancelPurse,chevronForwardOutline,userInfo,photoUrl}
 
     }
    

@@ -5,6 +5,7 @@ export class User{
     sex:string;
     city:string;
     repassword:string;
+    photourl:string;
 
     constructor(username,password){
         this.username = username;

@@ -2,23 +2,23 @@
         <ion-list class="searchBlock">
                 <ion-item>
                        <ion-label>价格范围</ion-label>
-                       <ion-input class="priceinput" :value="tempsearchCondition.pricestart" v-model="tempsearchCondition.pricestart"></ion-input> - <ion-input class="priceinput" :value="tempsearchCondition.priceend"  v-model="tempsearchCondition.priceend"></ion-input>
+                       <ion-input class="priceinput" :value="tempsearchCondition.pricefrom" v-model="tempsearchCondition.pricefrom"></ion-input> - <ion-input class="priceinput" :value="tempsearchCondition.priceto"  v-model="tempsearchCondition.priceto"></ion-input>
                 </ion-item>
                  <ion-item>
                        <ion-label>开始日期</ion-label>
-                        <DateSelect v-model:value="tempsearchCondition.datestart" dateid="datestart"   ></DateSelect> 
+                        <DateSelect v-model:value="tempsearchCondition.dateto" dateid="datestart"   ></DateSelect> 
                 </ion-item>
                 <ion-item>
                        <ion-label>结束日期</ion-label>
-                        <DateSelect  v-model:value="tempsearchCondition.dateend" dateid="dateend"  ></DateSelect>
+                        <DateSelect  v-model:value="tempsearchCondition.datefrom" dateid="dateend"  ></DateSelect>
                 </ion-item>
                  <ion-item>
                        <ion-label>关键字</ion-label>
-                       <ion-input class="keyinput" :value="tempsearchCondition.searchkey"  v-model="tempsearchCondition.searchkey"></ion-input>
+                       <ion-input class="keyinput" :value="tempsearchCondition.key"  v-model="tempsearchCondition.key"></ion-input>
                 </ion-item>
                   <ion-item>
                        <ion-label>收入类型</ion-label>
-                       <ion-select :value="tempsearchCondition.costType" okText="确定" cancelText="取消" v-model="tempsearchCondition.costType">
+                       <ion-select :value="tempsearchCondition.costtype" okText="确定" cancelText="取消" v-model="tempsearchCondition.costtype">
                               <ion-select-option :value="-1">全部</ion-select-option>
                                <ion-select-option :value="0">收入</ion-select-option>
                                 <ion-select-option :value="1">支出</ion-select-option>
@@ -41,15 +41,16 @@ import { defineComponent,ref } from 'vue';
 import { IonList,IonItem,IonLabel,IonSelect,IonInput,IonSelectOption } from '@ionic/vue';
 import {  calendar} from 'ionicons/icons';
 import DateSelect from  '@/components/DateSelect.vue'
-import { searchCondition } from '../store/searchCondition';
+import { searchCondition } from '../entity/searchCondition';
 import { CostType } from '../enum/costType';
+import { getFirstDate, getLastDate } from '@/utils/dateUtils';
 export default defineComponent({
   name: 'SearchBlock',
   props: {
     mySearchCondition:{
         type:searchCondition,
         default: function () {
-                  return new searchCondition(0,0,'','','',CostType.All);
+                  return new searchCondition(0,0,getFirstDate(new Date()),getLastDate(new Date()),'',CostType.All);
          }
     }
   },

@@ -70,17 +70,19 @@
 <script lang="ts">
 import { defineComponent,onBeforeMount,Ref,ref} from 'vue';
 import { Cost } from '@/store/cost';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonList,IonFab,IonFabButton,IonIcon,IonRefresher,IonRefresherContent, RefresherCustomEvent,IonMenu,menuController, onIonViewWillEnter, onIonViewWillLeave} from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonList,IonFab,IonFabButton,IonIcon,IonRefresher,IonRefresherContent, RefresherCustomEvent,IonMenu,menuController, onIonViewWillEnter, onIonViewWillLeave,useBackButton, useIonRouter} from '@ionic/vue';
 import { add,chevronDownCircleOutline } from 'ionicons/icons';
 import { useFinical } from '@/composables/useFinical'
 import  DateItemContainer  from '@/components/DateItemContainer.vue'
 import { CostArr } from '@/store/costArr';
 
-
+import { getFirstDate,getLastDate} from '@/utils/dateUtils'
 import SearchBlock from '@/components/SearchBlock.vue'
-import {searchCondition} from '@/store/searchCondition'
+import {searchCondition} from '@/entity/searchCondition'
 import { CostType } from '@/enum/costType';
 import store from '@/store';
+import {App} from  '@capacitor/app';
+import { Toast } from '@capacitor/toast';
 
 export default  defineComponent({
   name: 'FinicalListPage', 
@@ -91,9 +93,9 @@ export default  defineComponent({
      let costArr = new CostArr();
      const income = ref(0);
 
-     const mySearchCondition= ref(new searchCondition(0,0,'','','',CostType.All));
+     const mySearchCondition= ref(new searchCondition(0,0,getFirstDate(new Date()),getLastDate(new Date()),'',CostType.All));
 
-     const SearchCallback = ref((item:Cost)=>{ return new Date(item.date).getMonth() == new Date().getMonth()});
+    //  const SearchCallback = ref((item:Cost)=>{ return new Date(item.date).getMonth() == new Date().getMonth()});
     // let finialArr = {'2022-06-05':[
 
     //   new Cost( 1,  "2333","222", '2022-06-05')
@@ -103,8 +105,9 @@ export default  defineComponent({
     //重新刷新数据
     const resfreshList = async ( )=>{
  
-        finialArr.value =await costArr.getlist(SearchCallback.value);
-        income.value = await costArr.getSumBySearch(SearchCallback.value);
+        finialArr.value =await store.dispatch('getCost',mySearchCondition.value);
+        console.log( finialArr.value);
+        // income.value = await costArr.getSumBySearch(SearchCallback.value);
     }
 
     const doRefresh =async (event: RefresherCustomEvent)=>{
@@ -113,7 +116,7 @@ export default  defineComponent({
      
     }
     const valchange = async ()=>{
-      SearchCallback.value= (item:Cost)=>{ return new Date(item.date).getMonth() == new Date().getMonth()}; //编辑完出来
+      // SearchCallback.value= (item:Cost)=>{ return }; //编辑完出来
        resfreshList();
        addFinical.value = useFinical(new Cost( 0,  "","0", costArr.formatdate(),1),valchange ).addFinical;
 
@@ -130,55 +133,24 @@ export default  defineComponent({
 
     const searchFinish = (val)=>{
       mySearchCondition.value = val;
-      console.log(new Date(mySearchCondition.value.datestart));
-      let callback = (item:Cost)=>{
-        
-        let pricebool = true;
-        if(mySearchCondition.value.pricestart!= 0 &&mySearchCondition.value.pricestart!= null){
-          pricebool =pricebool && parseFloat(item.price)>=mySearchCondition.value.pricestart;
-        }
 
-       if(mySearchCondition.value.priceend!= 0 &&mySearchCondition.value.priceend!= null){
-          pricebool =pricebool && parseFloat(item.price)<=mySearchCondition.value.priceend;
-        }
-
-         let datebool = true;
-        if(mySearchCondition.value.datestart!= "" &&mySearchCondition.value.datestart!= null){
-          datebool =datebool && new Date(item.date).getTime()>=new Date(mySearchCondition.value.datestart).getTime();
-        }
-
-         if(mySearchCondition.value.dateend!= "" &&mySearchCondition.value.dateend!= null){
-          datebool =datebool && new Date(item.date).getTime()<=new Date(mySearchCondition.value.dateend).getTime();
-        }
-        let keybool = true;
-        if(mySearchCondition.value.searchkey!="" && mySearchCondition.value.searchkey!= null){
-          keybool = keybool && item.decript.indexOf(mySearchCondition.value.searchkey)!=-1;
-        }
-
-        let costtypebool = true;
-        if( mySearchCondition.value.costType!= CostType.All){
-          costtypebool = costtypebool && item.costtype == mySearchCondition.value.costType;
-        }
-
-        return pricebool && datebool && keybool && costtypebool;
-      }
-
-      SearchCallback.value = callback;
+    
+      // SearchCallback.value = callback;
       menuController.close('first');
       resfreshList();
     }
 
     onIonViewWillEnter(()=>{
-        store.dispatch("StartTimer");
-
+ 
         resfreshList();
 
+       
+        addFinical = ref(useFinical(new Cost( 0,  "","0", costArr.formatdate(),1),valchange ).addFinical);
     })
 
-    onIonViewWillLeave(()=>{
-        store.dispatch("ClearTimer");
-
-    })
+    // onIonViewWillLeave(()=>{
+      
+    // })
   
   
   
@@ -187,6 +159,29 @@ export default  defineComponent({
      
        resfreshList();
 
+
+    });
+
+    const ionRouter = useIonRouter();
+    let curBackTime =ref(0);
+    useBackButton(-1,async ()=>{
+      
+      if(! ionRouter.canGoBack()){
+        //当前按的时间和上一次对比
+        
+        if(new Date().getTime() - curBackTime.value> 2000){
+            await Toast.show({
+              text: '是否要退出app!',
+            });
+            curBackTime.value = new Date().getTime() ;
+        }else{
+        
+             App.exitApp();
+        }
+      }
+
+
+         
 
     });
 

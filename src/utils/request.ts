@@ -30,10 +30,9 @@ service.interceptors.request.use(
 service.interceptors.response.use(
     response=>{
        const res = response.data ;
-          console.log(res);
        if(res.success ==-1){
             //-1 token失效
-            return Promise.reject(res.msg);
+            return Promise.reject(res.message);
        }else{
             return res;
        }

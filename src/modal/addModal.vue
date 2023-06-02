@@ -35,7 +35,7 @@
                   <ion-label>
                       备注
                   </ion-label>
-                  <ion-input   v-model="updateCostItem.decript" v-bind:value="updateCostItem.decript"   ></ion-input>
+                  <ion-input   v-model="updateCostItem.descript" v-bind:value="updateCostItem.descript"   ></ion-input>
                  
              </ion-item>
              <ion-item>
@@ -92,7 +92,7 @@
   
 </style>
 <script lang="ts">
-import { IonContent, IonHeader, IonTitle, IonToolbar,modalController,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonIcon} from '@ionic/vue';
+import { IonContent, IonHeader, IonTitle, IonToolbar,modalController,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonIcon,useBackButton} from '@ionic/vue';
 import {  defineComponent,ref } from 'vue';
 import {  backspace ,calendar} from 'ionicons/icons';
 import { Cost } from '@/store/cost';
@@ -109,6 +109,8 @@ export default defineComponent({
  
   setup(props) {
     const dismissModal= ()=>{
+
+      
         modalController.dismiss({success:true});
     };
 
@@ -123,6 +125,7 @@ export default defineComponent({
     const selectDate =  (value) => { 
         updateCostItem.value.date =value;
     }
+
 
     return {
       backspace,dismissModal,calendar,updateCostItem,selectDate,costArr

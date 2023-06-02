@@ -11,8 +11,8 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <div class="avatorblock">
-          <ion-avatar>
-              <img src="/assets/img/avatar.svg">
+          <ion-avatar @click="takePhoto">
+              <img :src="photos.webviewPath">
         </ion-avatar>
       </div>
        
@@ -65,10 +65,12 @@
 <script lang="ts">
 import { defineComponent,onMounted,ref } from 'vue';
 import {User} from '@/store/user'
-  import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
+
+  import {  useRoute, useRouter } from 'vue-router';
 // import Highcharts from 'highcharts/highstock'
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonBackButton,IonButtons,IonItem,IonList,IonLabel,IonInput,IonButton,IonAvatar,IonSelect,IonSelectOption,pickerController, loadingController, alertController } from '@ionic/vue';
 import store from '@/store';
+import { usePhotoGallery} from '@/composables/usePhotoGallery'
 
 
 export default defineComponent({
@@ -77,12 +79,13 @@ export default defineComponent({
   setup(){
     const userModel=ref(new User("",""));
      const route = useRoute();
+  
 
      const userid = route.params.id;  //判断是注册还是修改
-    
-    onBeforeRouteUpdate(()=>{
-      alert('test2');
-    });
+    const { takePhoto,photos } = usePhotoGallery(userModel.value.photourl);
+
+
+
     const openPicker = async ()=>{
      
         const picker = await pickerController.create({
@@ -131,14 +134,21 @@ export default defineComponent({
           userModel.value.id = parseInt(userid.toString()) ;
           userModel.value.password = "";
           userModel.value.repassword = "";
+          photos.value.webviewPath = process.env.VUE_APP_BASE_API+"/"+userModel.value.photourl;
         }else{
           userModel.value.id = 0;
         }
+
+        if(userModel.value==null || userModel.value.photourl=="" ||userModel.value.photourl==null ){
+          photos.value.webviewPath = "/assets/img/avatar.svg";
+          }
      })
 
     const router = useRouter();
 
     const register = async ()=>{
+      userModel.value.photourl = photos.value.base64data;
+
       if(userModel.value.password == ""){
          let alert = await alertController.create({header:"提示",message:"请填写密码",buttons:['确定']});
             alert.present();
@@ -158,20 +168,28 @@ export default defineComponent({
 
         let res = await store.dispatch("register",userModel.value).catch(async (err)=>{
              loading.dismiss();
-
-            let alert = await alertController.create({header:"提示",message:err,buttons:['确定']});
-            alert.present();
+            if(err!=""){
+              let alert = await alertController.create({header:"提示",message:err,buttons:['确定']});
+              alert.present();
+            }
+            
         })
 
         if(res!=null){
                loading.dismiss();
 
-                
-              let alert = await alertController.create({header:"提示",message:res.msg,buttons:['确定']});
-              store.commit("SET_USER",userModel.value);
-              alert.present();
+              if(res.success!=1){
+                let alert = await alertController.create({header:"提示",message:res.msg,buttons:['确定']});
+                alert.present();
+              }
              
-               router.go(-2);
+              userModel.value.photourl = res.photourl
+              store.commit("SET_USER",userModel.value);
+              
+               //插入支出
+              store.dispatch("StartInserCost");
+
+              router.go(-2);
           }
         
        
@@ -203,7 +221,7 @@ export default defineComponent({
         alert.present();
     }
      
-    return {userModel,openPicker,userid,register,logout};
+    return {userModel,openPicker,userid,register,logout,takePhoto,photos};
   }
 
   

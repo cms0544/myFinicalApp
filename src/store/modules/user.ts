@@ -1,5 +1,6 @@
 import {login,register} from '@/api/user'
-import store from '..';
+import store from '@/store';
+import { alertController } from '@ionic/core';
 export default {
     namespace:true,
     state:{
@@ -49,9 +50,10 @@ export default {
                     if(result.success ==1){
                         commit('SET_TOKEN',result.token);
                         commit('SET_USER',result.user);
+                        store.dispatch("StartInserCost");
                         resolve(result);
                     }else{
-                        reject(result.msg);
+                        reject(result.message);
                     }
                    
                 }).catch((err)=>{
@@ -61,27 +63,39 @@ export default {
         },
         register({commit},userInfo){
             userInfo.username = userInfo.username.trim();
-            return new Promise((resolve,reject)=>{
            
-                register(userInfo).then((res)=>{
+                register(userInfo).then(async (res)=>{
                     const result = res as any;
                     if(result.success ==1){
                         commit('SET_TOKEN',result.token);
                         // commit('SET_USER',result.user);
-                        resolve(result);
+                        store.commit("SET_USER",result.user);
+              
+                        //插入支出
+                       store.dispatch("StartInserCost");
+                   
                     }else{
-                        reject(result.msg);
+                        const alert = await alertController
+                            .create({
+                            header: '确认!',
+                            message: '登录失败,'+result.msg+'!!!',
+                            buttons: ['确定']
+                            });
+                            alert.present();
+                     
                     }
                    
-                }).catch((err)=>{
-                    reject(err);
                 });
-            });
+          
         },
-        logout({commit}){
+        async logout({commit}){
+
+            await store.dispatch("StartInserCost");
+            await store.dispatch("removeCost");
             commit('SET_USER',null);
             commit('SET_TOKEN',null);
-            store.dispatch("removeCost");
+       
+     
         }
     }
 }

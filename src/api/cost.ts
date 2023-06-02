@@ -2,26 +2,26 @@ import request from '@/utils/request'
 
 export function insert(data){
    return request({
-      url:"/insertCost",
+      url:"/costs/insertCost",
       method:"post",
       data
    })
 }
 
 
-export function get(lastUpdateTime){
-   if(lastUpdateTime == null){
+export function get(params){
+   
       return request({
-         url:"/getCost",
-         method:"get"
-       
-      })
-   }else{
-      return request({
-         url:"/getCost",
+         url:"/costs",
          method:"get",
-         params:{lastUpdateTime}
+         params
       })
-   }
- 
+   
+}
+
+export function del(id){
+   return request({
+      url:"/costs/delete/"+id,
+      method:"delete"
+   })
 }

@@ -63,18 +63,21 @@ export default defineComponent({
         loading.present();
 
        let res = await store.dispatch('login',userModel).catch(async (err)=>{
-          loading.dismiss();
-          let alert = await alertController.create({header:"提示",message:err,buttons:['确定']});
-          alert.present();
+        loading.dismiss();  
+          if(err !=null){
+            
+              debugger
+              let alert = await alertController.create({header:"提示",message:err,buttons:['确定']});
+              alert.present();
+            }
+         
        });
 
      
-         if(res!=null){
-             await store.dispatch("confirmRemoveCost");
-               loading.dismiss();
- 
-               router.go(-1);
-          }
+            loading.dismiss();
+       
+              router.go(-1);
+      
       
          
     }

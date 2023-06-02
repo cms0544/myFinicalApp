@@ -3,7 +3,7 @@ import request from '@/utils/request'
 export function login(data){
 
     return request({
-        url:"/login",
+        url:"/users/login",
         method:"post",
         data
     })
@@ -12,7 +12,7 @@ export function login(data){
 export function register(data){
 
     return request({
-        url:"/register",
+        url:"/users/register",
         method:"post",
         data
     })

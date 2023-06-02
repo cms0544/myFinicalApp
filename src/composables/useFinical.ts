@@ -4,7 +4,7 @@ import { Cost } from '@/store/cost';
 
 export function useFinical(cost:Cost, callback:()=>void){
     const addFinical = async ()=>{
-        console.log('test22');
+       const costItem = Object.assign({},cost);
         const modal = await modalController
             .create({
             component: addModal,
@@ -12,7 +12,7 @@ export function useFinical(cost:Cost, callback:()=>void){
             cssClass: 'my-custom-class',
             mode:'ios',
             componentProps: {
-                costItem:cost
+                costItem
                 
             },
             
@@ -23,9 +23,11 @@ export function useFinical(cost:Cost, callback:()=>void){
         await modal.present();
 
         const modalRepson = await modal.onDidDismiss();
-        if(modalRepson.data.success == true){
+
+      
+        // if(modalRepson.data.success == true){
             callback();
-        }
+        // }
         
         
        

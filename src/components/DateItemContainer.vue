@@ -5,7 +5,7 @@
          </ion-item-divider>
          <ion-item v-for="(item,index) of value" :key="index" @click="showModal(item)"    @touchstart="touchlong(item)"   @touchend="touchlongend"      >
              <ion-label>
-              {{item.decript}}
+              {{item.descript}}
                  <ion-badge :color="item.costtype==0?'primary':'danger'">
                       {{item.costtype==0?"收入":"支出"}}
                   </ion-badge>
