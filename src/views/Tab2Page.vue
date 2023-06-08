@@ -151,7 +151,7 @@ import { add } from 'ionicons/icons';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonGrid,IonRow,IonCol, onIonViewWillEnter,IonModal,IonList,IonItem,IonLabel,IonInput,IonButtons,IonButton,IonAvatar,IonIcon } from '@ionic/vue';
 // import ExploreContainer from '@/components/ExploreContainer.vue';
 import { CostArr } from '@/store/costArr';
-import { Cost } from '@/store/cost';
+
 import { CostType } from '@/enum/costType'
 import DateSelect from '@/components/DateSelect.vue'
 import { Purse,PurseArr } from '@/store/purse'

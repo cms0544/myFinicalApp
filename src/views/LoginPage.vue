@@ -62,7 +62,7 @@ export default defineComponent({
         
         loading.present();
 
-       let res = await store.dispatch('login',userModel).catch(async (err)=>{
+        await store.dispatch('login',userModel).catch(async (err)=>{
         loading.dismiss();  
           if(err !=null){
             

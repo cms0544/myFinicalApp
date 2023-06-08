@@ -21,7 +21,7 @@ export function get(params){
 
 export function del(id){
    return request({
-      url:"/costs/delete/"+id,
+      url:"/costs/remove/"+id,
       method:"delete"
    })
 }

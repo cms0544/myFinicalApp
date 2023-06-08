@@ -22,7 +22,7 @@ export function useFinical(cost:Cost, callback:()=>void){
          
         await modal.present();
 
-        const modalRepson = await modal.onDidDismiss();
+         await modal.onDidDismiss();
 
       
         // if(modalRepson.data.success == true){

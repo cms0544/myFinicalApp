@@ -91,7 +91,7 @@ export default {
         async logout({commit}){
 
             await store.dispatch("StartInserCost");
-            await store.dispatch("removeCost");
+            // await store.dispatch("removeCost");
             commit('SET_USER',null);
             commit('SET_TOKEN',null);
        

@@ -4,6 +4,7 @@ import {insert,get,del} from '@/api/cost'
 import { Cost } from '../cost'
 import { Storage } from '@capacitor/storage';
 import { alertController } from '@ionic/core'
+import { CostType} from '@/enum/costType'
 import store from '..'
 export default {
     namespace:true,
@@ -35,6 +36,31 @@ export default {
                 return state.cost;
             }
            
+        },
+        //将支出转成日期:数组的格式
+        costJson(state){
+            return ()=>{
+                const returnJson = {};
+                const totalJson = {};
+                let total = 0;
+                state.cost.forEach((item)=>{
+                    const date = item.date.substr(0,10);
+                    if( returnJson[date]== null){
+                        returnJson[date] = [];
+                     
+                    }
+                    if( totalJson[date]== null){
+                        totalJson[date] = {total:0};
+                    }
+
+                    returnJson[date].push(item);
+                    const val =  item.costtype == CostType.Income ? item.price : - item.price;
+                    totalJson[date].total  += val;
+                    total+= val;
+                });
+            
+                return {incomeval:total,data:returnJson,total:totalJson};
+            }
         },
         storageCost(state){
             return async()=>{
@@ -120,7 +146,7 @@ export default {
 
     actions:{
           //保存支出
-            async addCost({commit,getters},updateCostItem:Cost): Promise<any>{
+            async addCost({state},updateCostItem:Cost): Promise<any>{
                 if(updateCostItem.descript == ""){
                     const alert = await alertController
                         .create({
@@ -168,55 +194,58 @@ export default {
             },
     
         //删除花费
-        removeCost:async ({commit,getters},updateCostItem:Cost)=>{
 
-            const res:any = await del(updateCostItem.id);
-            if(res.success == 1){
-                return true;
-            }else{
-                const alert = await alertController
-                .create({
-                header: '确认!',
-                message: '删除失败!!!',
-                buttons: ['确定']
-                });
-                alert.present();
-                return false;
-            }
-            
-        },
         //确认是否要删除消费记录
  
-        confirmRemoveCost:({dispatch,state},updateCostItem:Cost)=>{
-        
-                 alertController
+        confirmRemoveCost:({dispatch},data:{updateCostItem:Cost,callback:()=>void})=>{
+       
+                alertController
                 .create({
                   header: '确认!',
-                  message: '确认要删除该'+updateCostItem.descript+'记录!!!',
+                  message: '确认要删除"'+data.updateCostItem.descript+'"记录!!!',
                   buttons: [
                     {
                       text: '取消',
                       role: 'cancel',
                       cssClass: 'secondary',
-                      id: 'cancel-button',
-                      handler:async()=>{
-                        dispatch("removeCost");
-                      }
+                      id: 'cancel-button'
+                     
                     },
                     {
                       text: '确定',
-                      id: 'confirm-button'
-                     
+                      id: 'confirm-button',
+                      handler:async()=>{
+                       
+                            if(data.updateCostItem!=null){
+                                const res:any = await del(data.updateCostItem.id);
+                                if(res.success == 1){
+                                    data.callback();
+                                }else{
+                                    const alert = await alertController
+                                    .create({
+                                    header: '确认!',
+                                    message: '删除失败!!!',
+                                    buttons: ['确定']
+                                    });
+                                    alert.present();
+                                  
+                                }
+                            }
+                           
+                       
+                      }
                     
                     },
                   ],
                 }).then(confirmAlert=>{
                     confirmAlert.present();
                 });
+         
+                
 
         },
          //获取内存上的数组（新增和修改）
-        getCost:async ({commit,state},params)=>{
+        getCost:async ({state},params)=>{
         
                 if(store.getters.user!=null && store.getters.user!="null"){
                    const {res}:any = await get(params);
@@ -234,14 +263,17 @@ export default {
             //     const timer1 = setTimeout(async function(){
       
                     const uploadCost = await getters.storageCost();
-                    uploadCost.forEach(async (item,index)=>{
-                     await dispatch("insertCost",item);
-                      uploadCost.splice(index,1);
-                     await commit("SET_StorageCost",uploadCost);
-                    });
-
-
-                
+                    if(uploadCost !=null){
+                        uploadCost.forEach(async (item,index)=>{
+                            await dispatch("insertCost",item);
+                             uploadCost.splice(index,1);
+                            await commit("SET_StorageCost",uploadCost);
+                           });
+       
+       
+                       
+                    }
+                  
                     
                 //   },10000);
 

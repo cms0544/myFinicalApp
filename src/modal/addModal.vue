@@ -92,7 +92,7 @@
   
 </style>
 <script lang="ts">
-import { IonContent, IonHeader, IonTitle, IonToolbar,modalController,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonIcon,useBackButton} from '@ionic/vue';
+import { IonContent, IonHeader, IonTitle, IonToolbar,modalController,IonButtons,IonButton,IonList,IonItem,IonLabel,IonGrid,IonCol,IonRow,IonInput,IonToggle,IonIcon} from '@ionic/vue';
 import {  defineComponent,ref } from 'vue';
 import {  backspace ,calendar} from 'ionicons/icons';
 import { Cost } from '@/store/cost';
@@ -153,6 +153,10 @@ export default defineComponent({
         
         },
         confirm:async function(){
+
+            if(typeof this.updateCostItem.costtype == "boolean"){
+                this.updateCostItem.costtype =this.updateCostItem.costtype?1:0;
+            }
              let  returnVal = await store.dispatch("addCost",this.updateCostItem);
                 if(returnVal){
                          this.dismissModal();
@@ -161,11 +165,16 @@ export default defineComponent({
             
         },
         add:async function(){
-             let  returnVal = await store.dispatch("addCost",this.updateCostItem);
+           
+            
+                let returnVal = await store.dispatch("addCost",this.updateCostItem);
                 if(returnVal){
                         this.updateCostItem = new Cost();
                 }
             
+          
+            
+           
       
         },
 

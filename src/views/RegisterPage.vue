@@ -165,8 +165,8 @@ export default defineComponent({
           duration: 3000
         });
          loading.present();
-
-        let res = await store.dispatch("register",userModel.value).catch(async (err)=>{
+alert(process.env);
+        await store.dispatch("register",userModel.value).catch(async (err)=>{
              loading.dismiss();
             if(err!=""){
               let alert = await alertController.create({header:"提示",message:err,buttons:['确定']});
@@ -175,22 +175,20 @@ export default defineComponent({
             
         })
 
-        if(res!=null){
-               loading.dismiss();
-
-              if(res.success!=1){
-                let alert = await alertController.create({header:"提示",message:res.msg,buttons:['确定']});
-                alert.present();
-              }
+        loading.dismiss();
+        // if(res!=null){
              
-              userModel.value.photourl = res.photourl
-              store.commit("SET_USER",userModel.value);
-              
-               //插入支出
-              store.dispatch("StartInserCost");
+
+              // if(res.success!=1){
+              //   let alert = await alertController.create({header:"提示",message:res.msg,buttons:['确定']});
+              //   alert.present();
+              // }
+             
+              // userModel.value.photourl = res.photourl
+          
 
               router.go(-2);
-          }
+          // }
         
        
 

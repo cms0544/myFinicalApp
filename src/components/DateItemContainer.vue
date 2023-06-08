@@ -1,7 +1,7 @@
 <template>
         <ion-item-divider >
             <ion-label>{{keyitem}}</ion-label>   
-              <ion-label slot="end">花费{{total}}</ion-label>  
+              <ion-label slot="end">花费:{{-total}}</ion-label>  
          </ion-item-divider>
          <ion-item v-for="(item,index) of value" :key="index" @click="showModal(item)"    @touchstart="touchlong(item)"   @touchend="touchlongend"      >
              <ion-label>
@@ -24,46 +24,29 @@ import { Cost } from '@/store/cost';
 import { IonItemDivider,IonLabel,IonItem,alertController,IonBadge } from '@ionic/vue';
 import { CostArr } from '@/store/costArr';
 import { useFinical } from '@/composables/useFinical'
+import store from '@/store';
 
 
 export default defineComponent({
   name: 'DateItemContainer',
   props: {
     keyitem: String,
+    total:String,
     value:Array<Cost> 
   },
   setup(props,{emit}){
     let longtimer:number ;
     let costArr = new CostArr();
     const touchlong = (tempitem:Cost)=>{
-       
-      longtimer = window.setTimeout(async ()=>{
-        const alert = await alertController
-        .create({
-          header: '确认!',
-          message: '是否要删除该收入!!!',
-          buttons: [
-            {
-              text: '取消',
-              role: 'cancel',
-              cssClass: 'secondary',
-              id: 'cancel-button',
-              handler: blah => {
-                console.log('Confirm Cancel:', blah)
-              },
-            },
-            {
-              text: '确定',
-              id: 'confirm-button',
-              handler: async () => {
-                   await costArr.delete(tempitem.id);
-                  
-                   emit('valchange');
-              },
-            },
-          ],
-        });
-        alert.present();
+       debugger
+      longtimer = window.setTimeout( ()=>{
+
+      store.dispatch("confirmRemoveCost",{updateCostItem:tempitem,callback:()=>{
+        emit('valchange');
+      }});
+      //  debugger
+ 
+      
       },1000);
     }
 
@@ -77,18 +60,6 @@ export default defineComponent({
   
 
     return {touchlong,touchlongend,showModal,costArr};
-  },
-  computed:{
-    total:function(){
-        let returnVal = 0;
-        if(this.value!=null){
-            this.value.forEach(element => {
-              returnVal+= this.costArr.getTotal(element);
-           
-          });
-        }
-        return returnVal.toFixed(2);
-    }
   },
   components:{IonItemDivider,IonLabel,IonItem,IonBadge}
 });

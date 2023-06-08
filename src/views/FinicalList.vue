@@ -21,7 +21,7 @@
            <div class="search" @click="search">筛选</div>
        </div>
        <ion-list>
-           <DateItemContainer v-for="(item,key) of finialArr" :key="key" :keyitem="key" :value="item" @valchange="valchange"></DateItemContainer>
+           <DateItemContainer v-for="(item,key) of finialArr" :total="totalJson[key].total" :key="key" :keyitem="key" :value="item" @valchange="valchange"></DateItemContainer>
        </ion-list>
        <ion-fab vertical="bottom" sasd="asdas" horizontal="center" slot="fixed">
         <ion-fab-button @click="addFinical()">
@@ -93,6 +93,8 @@ export default  defineComponent({
      let costArr = new CostArr();
      const income = ref(0);
 
+     const totalJson = ref({});
+
      const mySearchCondition= ref(new searchCondition(0,0,getFirstDate(new Date()),getLastDate(new Date()),'',CostType.All));
 
     //  const SearchCallback = ref((item:Cost)=>{ return new Date(item.date).getMonth() == new Date().getMonth()});
@@ -105,8 +107,12 @@ export default  defineComponent({
     //重新刷新数据
     const resfreshList = async ( )=>{
  
-        finialArr.value =await store.dispatch('getCost',mySearchCondition.value);
-        console.log( finialArr.value);
+        await store.dispatch('getCost',mySearchCondition.value);
+        let { incomeval,data,total} = store.getters.costJson();
+
+        finialArr.value = data;
+        income.value = incomeval;
+        totalJson.value = total;
         // income.value = await costArr.getSumBySearch(SearchCallback.value);
     }
 
@@ -117,6 +123,7 @@ export default  defineComponent({
     }
     const valchange = async ()=>{
       // SearchCallback.value= (item:Cost)=>{ return }; //编辑完出来
+
        resfreshList();
        addFinical.value = useFinical(new Cost( 0,  "","0", costArr.formatdate(),1),valchange ).addFinical;
 
@@ -187,7 +194,7 @@ export default  defineComponent({
 
  
 
-    return { finialArr,add,addFinical,valchange,doRefresh,chevronDownCircleOutline,income,search,mySearchCondition,searchFinish};
+    return { finialArr,add,addFinical,valchange,doRefresh,chevronDownCircleOutline,income,search,mySearchCondition,searchFinish,totalJson};
   }
 });
 </script>

@@ -1,6 +1,6 @@
-import { Camera, CameraResultType, Photo } from '@capacitor/camera';
+import { Camera, CameraResultType } from '@capacitor/camera';
 import { ref } from 'vue';
-import { FileTransfer, FileUploadOptions, FileTransferObject  } from "@ionic-native/file-transfer"
+// import { FileTransfer, FileUploadOptions, FileTransferObject  } from "@ionic-native/file-transfer"
 import { Directory, Filesystem} from '@capacitor/filesystem';
 
 
@@ -53,33 +53,33 @@ export function usePhotoGallery(img){
         });
     }
 
-    const savePicture = async(photoStr: string):Promise<UserPhoto> =>{
+    // const savePicture = async(photoStr: string):Promise<UserPhoto> =>{
     
-        const options: FileUploadOptions = {
-            fileKey: 'file',
-            fileName: "test.jpg",
-            mimeType:"image/jpeg",
-            httpMethod:"post",
-            headers: {}
+    //     const options: FileUploadOptions = {
+    //         fileKey: 'file',
+    //         fileName: "test.jpg",
+    //         mimeType:"image/jpeg",
+    //         httpMethod:"post",
+    //         headers: {}
           
-         }
+    //      }
 
        
    
-         try{
-            const fileTransfer: FileTransferObject = await FileTransfer.create();
-            const data = await fileTransfer.upload(photoStr,"http://192.168.1.101:9999/upload",options);
-            console.log(data);
-         }catch(ex){
-            console.log(ex);
-         }
+    //      try{
+    //         const fileTransfer: FileTransferObject = await FileTransfer.create();
+    //         const data = await fileTransfer.upload(photoStr,"http://192.168.1.101:9999/upload",options);
+    //         console.log(data);
+    //      }catch(ex){
+    //         console.log(ex);
+    //      }
        
-        return {
-            base64data:"",
-            webviewPath:photoStr
-        }
+    //     return {
+    //         base64data:"",
+    //         webviewPath:photoStr
+    //     }
 
-    }
+    // }
 
 
 
