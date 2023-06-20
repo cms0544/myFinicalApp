@@ -46,6 +46,8 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonBackButton,IonB
 // import ExploreContainer from '@/components/ExploreContainer.vue';
 import { Cost } from '@/store/cost';
 import { CostArr } from '@/store/costArr';
+import store from '@/store';
+import { getYearFirstDate } from '@/utils/dateUtils';
 
 
 
@@ -60,8 +62,10 @@ export default defineComponent({
       const options = 	[{value: 10, name: "10KG"}, {value: 20, name: "20KG"}];
       const tempselect = ref(20);
       const loadChart=async ()=>{
-        let monthData = await costArr.getlistByMonth((item:Cost)=>{return new Date(item.date).getFullYear() == selectYear.value});
-            let categories = [];
+      
+        // let monthData = await costArr.getlistByMonth((item:Cost)=>{return new Date(item.date).getFullYear() == selectYear.value});
+       let monthData =await store.dispatch("GetMonthData",{datefrom:getYearFirstDate(new Date(new Date().setFullYear(selectYear.value)))});
+        let categories = [];
             monthData.forEach((item)=>{
               categories.push(item.name);
             })

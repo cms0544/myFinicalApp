@@ -169,7 +169,9 @@ export default defineComponent({
             
                 let returnVal = await store.dispatch("addCost",this.updateCostItem);
                 if(returnVal){
+                        const olddate = this.updateCostItem.date;
                         this.updateCostItem = new Cost();
+                        this.updateCostItem.date = olddate
                 }
             
           

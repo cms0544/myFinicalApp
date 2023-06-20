@@ -1,5 +1,5 @@
 
-import {insert,get,del} from '@/api/cost'
+import {insert,get,del,getSum, getMonthTotal} from '@/api/cost'
 
 import { Cost } from '../cost'
 import { Storage } from '@capacitor/storage';
@@ -10,7 +10,9 @@ export default {
     namespace:true,
     state:{
         cost:null,
-        storageCost:null
+        storageCost:null,
+        sumCost:0,
+        monthSeries:null
 
     },
     getters:{
@@ -63,15 +65,17 @@ export default {
             }
         },
         storageCost(state){
-            return async()=>{
-                const {value} =await Storage.get({key:"myFinical"});
-                let myFinicalArr = [];
-                if(value!=null){
-                    myFinicalArr = JSON.parse(value);
-                }
-                state.storageCost = myFinicalArr;
+            return ()=>{
+           
+               return state.storageCost ;
             }
               
+        },
+        sumCost:(state)=>{
+            return state.sumCost;
+        },
+        monthSeries:(state)=>{
+            return state.monthSeries;
         }
     },
     mutations:{
@@ -138,9 +142,15 @@ export default {
            
         },
         SET_StorageCost:async (state,costArr)=>{
-            await Storage.set({key:"myFinical",value:costArr});
+          
             state.storageCost = costArr;
            
+        },
+        SET_SUMCOST:(state,sum)=>{
+            state.sumCost = sum;
+        },
+        SET_MONTHSERIES:(state,monthseries)=>{
+            state.monthSeries = monthseries;
         }
     },    
 
@@ -258,22 +268,32 @@ export default {
                     return null;
                 }
         },
-        StartInserCost:async ({dispatch,commit,getters})=>{
+        StartInserCost:async ({dispatch,commit,getters,state})=>{
             // if(getters.timer1==null){
             //     const timer1 = setTimeout(async function(){
-      
-                    const uploadCost = await getters.storageCost();
-                    if(uploadCost !=null){
-                        uploadCost.forEach(async (item,index)=>{
-                            await dispatch("insertCost",item);
-                             uploadCost.splice(index,1);
-                            await commit("SET_StorageCost",uploadCost);
+                    const {value} =await Storage.get({key:"myFinical"});
+                    let myFinicalArr = [];
+                    if(value!=null){
+                        myFinicalArr = JSON.parse(value);
+                    }
+                    await commit("SET_StorageCost",myFinicalArr);
+                    
+                    if(getters.storageCost !=null){
+                        getters.storageCost.forEach(async (item,index)=>{
+                            const res = await dispatch("insertCost",item);
+                            if(res.success == 1){
+                                getters.storageCost.splice(index,1);
+                                await Storage.set({key:"myFinical",value:getters.storageCost});
+                                await commit("SET_StorageCost",getters.storageCost);
+                            }
+                           
                            });
        
        
                        
                     }
                   
+                    return getters.storageCost;
                     
                 //   },10000);
 
@@ -292,6 +312,26 @@ export default {
 
 
            
+        },
+        GetSumCost:async ({getters,commit},params)=>{
+
+            const res:any = await getSum(params);
+            if(res.success == 1){
+                commit('SET_SUMCOST',res.sum);
+            }else{
+                commit('SET_SUMCOST',0);
+            }
+            return getters.sumCost;
+            
+        },
+        GetMonthData:async({getters,commit},params)=>{
+            const res:any = await getMonthTotal(params);
+            if(res.success == 1){
+                commit('SET_MONTHSERIES',res.res);
+            }else{
+                commit('SET_MONTHSERIES',[]);
+            }
+            return getters.monthSeries;
         }
     }
 

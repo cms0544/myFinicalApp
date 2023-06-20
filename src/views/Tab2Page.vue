@@ -71,11 +71,11 @@
                              <ion-list>
                                      <ion-item>
                                         <ion-label>开始日期</ion-label>
-                                        <DateSelect v-model:value="purse.begindate"  ></DateSelect>
+                                        <DateSelect v-model:value="purse.insertdate"  ></DateSelect>
                                     </ion-item>
                                     <ion-item>
                                         <ion-label>金额</ion-label>
-                                        <ion-input :value="purse.beginmoney"  v-model="purse.beginmoney"></ion-input>
+                                        <ion-input :value="purse.currentprice"  v-model="purse.currentprice"></ion-input>
                                     </ion-item>
                             
                                     
@@ -152,9 +152,9 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent,IonGrid,IonRow,Ion
 // import ExploreContainer from '@/components/ExploreContainer.vue';
 import { CostArr } from '@/store/costArr';
 
-import { CostType } from '@/enum/costType'
+
 import DateSelect from '@/components/DateSelect.vue'
-import { Purse,PurseArr } from '@/store/purse'
+import { Purse } from '@/store/purse'
 import { chevronForwardOutline } from 'ionicons/icons';
 import store from '@/store';
 import { getFirstDate,getLastDate} from "@/utils/dateUtils"
@@ -170,53 +170,55 @@ export default defineComponent({
       let costArr = new CostArr();
       let total = ref(0);
       let currMoney = ref(null);
-      const purseArr = new PurseArr();
-      const purse = ref(purseArr.purse) as Ref<Purse>;
+
+      const purse = ref(null) as Ref<Purse>;
 
       
 
       const purseModal = ref();
     
       onIonViewWillEnter(async ()=>{
-
+            let param = {
+              datefrom:getFirstDate(new Date()),
+              dateto:getLastDate(new Date()),
+              costtype:-1
+            };
             // let finialArr = await store.getters.cost((item:Cost)=>{
             // return new Date(item.date).getMonth() == new Date().getMonth()
             // });
-            let finialArr = await store.dispatch('getCost',{
-              datefrom:getFirstDate(new Date()),
-              dateto:getLastDate(new Date())
-            });
+            /* 月总收入  */
+            mouthTotal.value = await store.dispatch('GetSumCost',param);
 
+            /* 月支出  */
+            param.costtype = 1;
+            mouthExpenditure.value = await store.dispatch('GetSumCost',param);
+            mouthExpenditure.value = - mouthExpenditure.value;
+             /* 月收入  */
+            param.costtype = 0;
+            mouthIncome.value =  await store.dispatch('GetSumCost',param);
+         
           
-            mouthIncome.value = 0;
-            mouthExpenditure.value = 0;
-            mouthTotal.value = 0;
-            total.value = 0;
-            finialArr.forEach((item)=>{
-              if(item.costtype == CostType.Income){
-                  mouthIncome.value = mouthIncome.value+parseFloat(item.price);
-              }
-
-              if(item.costtype == CostType.Expenditure){
-                  mouthExpenditure.value = mouthExpenditure.value+parseFloat(item.price);
-              }
-
-              
-            });
-
-             mouthTotal.value =  mouthIncome.value - mouthExpenditure.value ;
+            
             //总收入
 
-             total.value = await costArr.getSumBySearch();
-       
-             purse.value = await purseArr.getPurse();
-             currMoney.value = await purseArr.calcuTotal();
+            total.value =  await store.dispatch('GetSumCost');
+              
+
+              //计算钱包   上次录入的钱包余额加之后的总收入
+            purse.value = await store.dispatch("getCurrentPrice");
+            debugger
+            const temptotal = await store.dispatch('GetSumCost',{datefrom:purse.value.insertdate});
+           currMoney.value =  parseFloat(temptotal) + parseFloat(purse.value.currentprice) 
+            
       })
 
   
       const confirmPurse =async ()=>{
 
-        currMoney.value = await purseArr.calcuTotal(true);
+        await store.dispatch("insertCurrentPrice",purse.value);
+        
+        currMoney.value =  parseFloat(total.value.toString()) + parseFloat(purse.value.currentprice) 
+
         purseModal.value.$el.dismiss();
       }
 

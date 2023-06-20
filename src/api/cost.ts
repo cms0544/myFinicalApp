@@ -25,3 +25,19 @@ export function del(id){
       method:"delete"
    })
 }
+
+export function getSum(params){
+   return request({
+      url:"/costs/getsum",
+      method:"get",
+      params
+   })
+}
+
+export function getMonthTotal(params){
+   return request({
+      url:"/costs/getSumByMonth",
+      method:"get",
+      params
+   })
+}

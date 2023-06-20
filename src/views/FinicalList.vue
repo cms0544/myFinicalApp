@@ -95,7 +95,7 @@ export default  defineComponent({
 
      const totalJson = ref({});
 
-     const mySearchCondition= ref(new searchCondition(0,0,getFirstDate(new Date()),getLastDate(new Date()),'',CostType.All));
+     const mySearchCondition= ref(new searchCondition(null,null,getFirstDate(new Date()),getLastDate(new Date()),'',CostType.All));
 
     //  const SearchCallback = ref((item:Cost)=>{ return new Date(item.date).getMonth() == new Date().getMonth()});
     // let finialArr = {'2022-06-05':[
